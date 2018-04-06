@@ -8,7 +8,10 @@ html {
 }
 canvas {
     border:1px solid #d3d3d3;
-    background-color: #f1f1f1;
+    background-image: URL("https://i.imgur.com/h0qS1q1.png");
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
     margin: auto;
     display: block;
 }
@@ -30,15 +33,16 @@ let gameOver = false;
 const obstacleWidth = 30;
 
 function resetGame() {
-    // myGameArea.clear();
+    myGameArea.clear();
     clearInterval(myGameArea.interval);
     startGame();
  }
 
 function startGame() {
-    myGamePiece = new component(40, 40, 10, 120, undefined, "player");
+    myGamePiece = new component(40, 40, 50, 120, undefined, "player");
     myScore = new component("30px", "Consolas", 280, 40, "black", "text");
     myGameArea.start();
+    obstaclesCleared = 0;
     myObstacles = [];
 }
 
@@ -76,7 +80,7 @@ function component(width, height, x, y, color, type) {
             ctx.fillStyle = color;
             ctx.fillText(this.text, this.x, this.y);
             ctx.closePath();
-        } else if( this.type == "player") {
+        } else if(this.type == "player") {
                 ctx.beginPath();    
                 ctx.drawImage(myGameArea.img, this.x, this.y,this.width, this.height);
                 ctx.closePath();
@@ -91,7 +95,7 @@ function component(width, height, x, y, color, type) {
         if(key == keys.UP) {
              this.y -= 5;
         }
-         else {
+         else if(key == keys.DOWN) {
              this.y += 5;
         }
         this.hitBottom();
@@ -142,7 +146,7 @@ function updateGameArea() {
     }
     myGameArea.clear();
     myGameArea.frameNo += 1;
-    if (myGameArea.frameNo == 1 || everyinterval(150)) {
+    if (myGameArea.frameNo == 1 || everyinterval(250)) {
         x = myGameArea.canvas.width;
         minHeight = 20;
         maxHeight = 185;
@@ -150,8 +154,8 @@ function updateGameArea() {
         minGap = 60;
         maxGap = 200;
         gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
-        myObstacles.push(new component(obstacleWidth, height, x, 0, "green"));
-        myObstacles.push(new component(obstacleWidth, x - height - gap, x, height + gap, "green"));
+        myObstacles.push(new component(obstacleWidth, height, x, 0, "#b0a4b0"));
+        myObstacles.push(new component(obstacleWidth, x - height - gap, x, height + gap, "#b0a4b0"));
     }
     for (var i = 0; i < myObstacles.length; i += 1) {
         myObstacles[i].x += -1;
@@ -164,7 +168,6 @@ function updateGameArea() {
                 myObstacles.shift();
                 myObstacles.shift();
                 obstaclesCleared++;
-                console.log(myObstacles.length)
             }
     myScore.text="SCORE: " + obstaclesCleared;
     myScore.update();
@@ -196,9 +199,11 @@ function everyinterval(n) {
 function move(e) {
     // alert(e.keyCode);
     // var key_state = (e.type == "keydown")?true:false;
-    
-    if((e.keyCode == keys.UP || e.keyCode == keys.DOWN) && gameOver == false){
-        myGamePiece.newPos(e.keyCode);
+    var kc = e.keyCode || e.which;
+    keys[kc] = e.type == 'keydown';
+      
+    if(keys[kc] && gameOver == false){
+        myGamePiece.newPos(kc);
     }
     //myGamePiece.update();
     // if(controller.up || controller.down) {
@@ -206,14 +211,11 @@ function move(e) {
     // }
 }
 
-document.addEventListener("keydown", move/*controller.keyListener*/);
-document.addEventListener("keyup", move/*controller.keyListener*/);
-
+document.addEventListener("keyup", move);
+document.addEventListener("keydown", move);
 // document.onkeydown = move;
-
 </script>
 <br>
 <button onmousedown="resetGame()">Restart</button>
-
 </body>
 </html>
